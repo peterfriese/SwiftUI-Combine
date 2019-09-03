@@ -160,7 +160,7 @@ struct ContentView: View {
       }
       Section {
         Button(action: { }) {
-          Text("Login")
+          Text("Sign up")
         }.disabled(!self.userModel.valid)
       }
     }
