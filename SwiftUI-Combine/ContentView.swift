@@ -14,17 +14,6 @@ class UserModel: ObservableObject {
   @Published var password = ""
   @Published var passwordAgain = ""
   @Published var valid = false
-  
-  private var userNameCancellable: AnyCancellable?
-  
-  init() {
-    userNameCancellable = $userName
-      .map { name in
-        return name.count >= 3
-      }
-      .assign(to: \.valid, on: self)
-  }
-  
 }
 
 struct ContentView: View {
