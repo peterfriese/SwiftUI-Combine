@@ -11,11 +11,16 @@ import Combine
 import Navajo_Swift
 
 class UserModel: ObservableObject {
+  // input
   @Published var userName = ""
   @Published var password = ""
   @Published var passwordAgain = ""
-  @Published var valid = false
   
+  // output
+  @Published var userNameMessage = ""
+  @Published var passwordMessage = ""
+  @Published var valid = false
+
   private var cancellableSet: Set<AnyCancellable> = []
   
   private var isUserNameValidPublisher: AnyPublisher<Bool, Never> {
@@ -106,6 +111,31 @@ class UserModel: ObservableObject {
   }
   
   init() {
+    isUserNameValidPublisher
+      .receive(on: RunLoop.main)
+      .map { valid in
+        valid ? "" : "User name must at leat have 3 characters"
+      }
+      .assign(to: \.userNameMessage, on: self)
+      .store(in: &cancellableSet)
+    
+    isPasswordValidPublisher
+      .receive(on: RunLoop.main)
+      .map { passwordCheck in
+        switch passwordCheck {
+        case .empty:
+          return "Password must not be empty"
+        case .noMatch:
+          return "Passwords don't match"
+        case .notStrongEnough:
+          return "Password not strong enough"
+        default:
+          return ""
+        }
+      }
+      .assign(to: \.passwordMessage, on: self)
+      .store(in: &cancellableSet)
+
     isFormValidPublisher
       .receive(on: RunLoop.main)
       .assign(to: \.valid, on: self)
@@ -120,22 +150,21 @@ struct ContentView: View {
   
   var body: some View {
     Form {
-      Section {
+      Section(footer: Text(userModel.userNameMessage).foregroundColor(.red)) {
         TextField("Username", text: $userModel.userName)
           .autocapitalization(.none)
       }
-      Section {
+      Section(footer: Text(userModel.passwordMessage).foregroundColor(.red)) {
         SecureField("Password", text: $userModel.password)
         SecureField("Password again", text: $userModel.passwordAgain)
       }
       Section {
         Button(action: { }) {
-          Text("Sign up")
-        }.disabled(!userModel.valid)
+          Text("Login")
+        }.disabled(!self.userModel.valid)
       }
     }
   }
-  
 }
 
 struct ContentView_Previews: PreviewProvider {
