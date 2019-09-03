@@ -7,27 +7,44 @@
 //
 
 import SwiftUI
+import Combine
+
+class UserModel: ObservableObject {
+  @Published var userName = ""
+  @Published var password = ""
+  @Published var passwordAgain = ""
+  @Published var valid = false
+  
+  private var userNameCancellable: AnyCancellable?
+  
+  init() {
+    userNameCancellable = $userName
+      .map { name in
+        return name.count >= 3
+      }
+      .assign(to: \.valid, on: self)
+  }
+  
+}
 
 struct ContentView: View {
-  @State private var userName = ""
-  @State private var password = ""
-  @State private var passwordAgain = ""
-  @State private var valid = false
+  
+  @ObservedObject private var userModel = UserModel()
   
   var body: some View {
     Form {
       Section {
-        TextField("Username", text: $userName)
+        TextField("Username", text: $userModel.userName)
           .autocapitalization(.none)
       }
       Section {
-        SecureField("Password", text: $password)
-        SecureField("Password again", text: $passwordAgain)
+        SecureField("Password", text: $userModel.password)
+        SecureField("Password again", text: $userModel.passwordAgain)
       }
       Section {
         Button(action: { }) {
           Text("Sign up")
-        }.disabled(!valid)
+        }.disabled(!userModel.valid)
       }
     }
   }
