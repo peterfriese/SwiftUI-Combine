@@ -1,0 +1,16 @@
+PODS:
+  - Navajo-Swift (2.1.0)
+
+DEPENDENCIES:
+  - Navajo-Swift
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Navajo-Swift
+
+SPEC CHECKSUMS:
+  Navajo-Swift: 57b93e73efbfbf452433efbff04402de56beff51
+
+PODFILE CHECKSUM: 21a261f53df521c3dd277f00f37c6d4e9069747d
+
+COCOAPODS: 1.7.5
