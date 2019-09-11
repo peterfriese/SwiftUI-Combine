@@ -1,30 +1,30 @@
 //
-//  ContentView.swift
+//  UserViewModel.swift
 //  SwiftUI-Combine
 //
-//  Created by Peter Friese on 02/09/2019.
+//  Created by Peter Friese on 11/09/2019.
 //  Copyright © 2019 Google LLC. All rights reserved.
 //
 
-import SwiftUI
+import Foundation
 import Combine
 import Navajo_Swift
 
-class UserModel: ObservableObject {
+class UserViewModel: ObservableObject {
   // input
-  @Published var userName = ""
+  @Published var username = ""
   @Published var password = ""
   @Published var passwordAgain = ""
   
   // output
-  @Published var userNameMessage = ""
+  @Published var usernameMessage = ""
   @Published var passwordMessage = ""
-  @Published var valid = false
+  @Published var isValid = false
 
   private var cancellableSet: Set<AnyCancellable> = []
   
-  private var isUserNameValidPublisher: AnyPublisher<Bool, Never> {
-    $userName
+  private var isUsernameValidPublisher: AnyPublisher<Bool, Never> {
+    $username
       .debounce(for: 0.8, scheduler: RunLoop.main)
       .removeDuplicates()
       .map { input in
@@ -43,7 +43,7 @@ class UserModel: ObservableObject {
       .eraseToAnyPublisher()
   }
 
-  private var isPasswordsEqualPublisher: AnyPublisher<Bool, Never> {
+  private var arePasswordsEqualPublisher: AnyPublisher<Bool, Never> {
     Publishers.CombineLatest($password, $passwordAgain)
       .debounce(for: 0.2, scheduler: RunLoop.main)
       .map { password, passwordAgain in
@@ -84,7 +84,7 @@ class UserModel: ObservableObject {
   }
   
   private var isPasswordValidPublisher: AnyPublisher<PasswordCheck, Never> {
-    Publishers.CombineLatest3(isPasswordEmptyPublisher, isPasswordsEqualPublisher, isPasswordStrongEnoughPublisher)
+    Publishers.CombineLatest3(isPasswordEmptyPublisher, arePasswordsEqualPublisher, isPasswordStrongEnoughPublisher)
       .map { passwordIsEmpty, passwordsAreEqual, passwordIsStrongEnough in
         if (passwordIsEmpty) {
           return .empty
@@ -103,7 +103,7 @@ class UserModel: ObservableObject {
   }
   
   private var isFormValidPublisher: AnyPublisher<Bool, Never> {
-    Publishers.CombineLatest(isUserNameValidPublisher, isPasswordValidPublisher)
+    Publishers.CombineLatest(isUsernameValidPublisher, isPasswordValidPublisher)
       .map { userNameIsValid, passwordIsValid in
         return userNameIsValid && (passwordIsValid == .valid)
       }
@@ -111,12 +111,12 @@ class UserModel: ObservableObject {
   }
   
   init() {
-    isUserNameValidPublisher
+    isUsernameValidPublisher
       .receive(on: RunLoop.main)
       .map { valid in
-        valid ? "" : "User name must at leat have 3 characters"
+        valid ? "" : "User name must at least have 3 characters"
       }
-      .assign(to: \.userNameMessage, on: self)
+      .assign(to: \.usernameMessage, on: self)
       .store(in: &cancellableSet)
     
     isPasswordValidPublisher
@@ -138,37 +138,8 @@ class UserModel: ObservableObject {
 
     isFormValidPublisher
       .receive(on: RunLoop.main)
-      .assign(to: \.valid, on: self)
+      .assign(to: \.isValid, on: self)
       .store(in: &cancellableSet)
   }
 
-}
-
-struct ContentView: View {
-  
-  @ObservedObject private var userModel = UserModel()
-  
-  var body: some View {
-    Form {
-      Section(footer: Text(userModel.userNameMessage).foregroundColor(.red)) {
-        TextField("Username", text: $userModel.userName)
-          .autocapitalization(.none)
-      }
-      Section(footer: Text(userModel.passwordMessage).foregroundColor(.red)) {
-        SecureField("Password", text: $userModel.password)
-        SecureField("Password again", text: $userModel.passwordAgain)
-      }
-      Section {
-        Button(action: { }) {
-          Text("Sign up")
-        }.disabled(!self.userModel.valid)
-      }
-    }
-  }
-}
-
-struct ContentView_Previews: PreviewProvider {
-  static var previews: some View {
-    ContentView()
-  }
 }
