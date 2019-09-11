@@ -55,7 +55,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-![SwiftUI & Combine Screen Shot][product-screenshot]
+![SwiftUI & Combine Screen Demo][product-demo]
 
 ### Built With
 
@@ -168,3 +168,4 @@ Project Link: [https://github.com/peterfriese/SwiftUI-Combine](https://github.co
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=flat-square&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/othneildrew
 [product-screenshot]: images/screenshot.png
+[product-demo]: [images/demo.gif]
